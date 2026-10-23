@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="UTF-8" /><title>自检（开发用）</title></head>
+<body><pre id="out">running</pre><script type="module">
+// 在浏览器里验证画布输出：尺寸、格式头、留白 / 透明 / 裁切像素、大小上限降质量、损坏图片报错
+import { loadImage } from '/src/tool/canvas.ts';
+import { fitToLimit } from '/src/tool/core.ts';
+const res = [];
+const check = (name, ok, info = '') => res.push(`${ok ? 'PASS' : 'FAIL'} ${name}${info ? ' · ' + info : ''}`);
+const magic = (d) => Array.from(d.slice(0, 4)).map((b) => b.toString(16).padStart(2, '0')).join('');
+async function source(w, h, { noise = false, alpha = false } = {}) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d');
+  if (noise) {
+    const im = g.createImageData(w, h);
+    for (let i = 0; i < im.data.length; i++) im.data[i] = (i % 4 === 3) ? 255 : (Math.random() * 256) | 0;
+    g.putImageData(im, 0, 0);
+  } else {
+    g.fillStyle = alpha ? 'rgba(200,40,40,0.5)' : 'rgb(200,40,40)'; g.fillRect(0, 0, w, h);
+  }
+  return new Uint8Array(await (await new Promise((r) => c.toBlob(r, 'image/png'))).arrayBuffer());
+}
+async function pixels(data) {
+  const img = new Image(); img.src = URL.createObjectURL(new Blob([data])); await img.decode();
+  const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+  const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+  return { w: c.width, h: c.height, at: (x, y) => Array.from(g.getImageData(x, y, 1, 1).data) };
+}
+try {
+  // 1. 横图 1600x800 留白白底 → 800x800 JPG，顶部是白色，中间是红色
+  const a = await loadImage(await source(1600, 800));
+  const jpg = await a.render(800, 800, 'pad', 'white').encode('jpg', 90);
+  let p = await pixels(jpg);
+  check('留白 JPG 尺寸与格式头', p.w === 800 && p.h === 800 && magic(jpg).startsWith('ffd8ff'), `${p.w}x${p.h} magic=${magic(jpg)}`);
+  check('留白区域是白色', p.at(400, 20).slice(0, 3).every((v) => v > 245), `top=${p.at(400, 20)}`);
+  check('图片区域是红色', p.at(400, 400)[0] > 180 && p.at(400, 400)[1] < 70, `mid=${p.at(400, 400)}`);
+  // 2. 居中裁切：铺满，没有白边
+  const crop = await a.render(750, 1000, 'crop', 'white').encode('jpg', 90);
+  p = await pixels(crop);
+  check('裁切 750x1000 铺满无白边', p.w === 750 && p.h === 1000 && p.at(5, 5)[1] < 70 && p.at(745, 995)[1] < 70, `${p.w}x${p.h} corner=${p.at(5, 5)}`);
+  // 3. PNG 透明留白
+  const png = await a.render(800, 800, 'pad', 'transparent').encode('png', 100);
+  p = await pixels(png);
+  check('PNG 透明留白', magic(png) === '89504e47' && p.at(400, 20)[3] === 0 && p.at(400, 400)[3] === 255, `magic=${magic(png)} topAlpha=${p.at(400, 20)[3]}`);
+  // 4. 大图 4000x3000 分步缩小
+  const big = await loadImage(await source(4000, 3000));
+  const bj = await big.render(800, 800, 'pad', 'white').encode('jpg', 90);
+  p = await pixels(bj);
+  check('4000x3000 缩到 800x800', p.w === 800 && p.h === 800, `${bj.length}B`);
+  // 5. 噪点图超过上限时逐步降质量
+  const n = await loadImage(await source(1200, 1200, { noise: true }));
+  const r = n.render(800, 800, 'pad', 'white');
+  const first = await r.encode('jpg', 90);
+  const limit = Math.round(first.length * 0.6);
+  const fit = await fitToLimit((q) => r.encode('jpg', q), limit, 90, false);
+  check('超过上限自动降质量', fit.ok && fit.data.length <= limit && fit.quality < 90, `q90=${first.length}B 上限=${limit}B → q${fit.quality} ${fit.data.length}B`);
+  // 6. 损坏图片
+  try { await loadImage(new Uint8Array([1, 2, 3])); check('损坏图片报错', false); } catch (e) { check('损坏图片报错', e.message.includes('无法识别'), e.message); }
+} catch (e) { res.push('FAIL 异常 ' + (e.stack || e)); }
+document.getElementById('out').textContent = res.join('\n');
+</script></body></html>

@@ -1,0 +1,13 @@
+{
+  "id": "e07",
+  "slug": "main-image-resizer",
+  "name": "主图多平台尺寸导出",
+  "version": "0.1.0",
+  "repo": "campfire-code/main-image-resizer",
+  "license": "MIT",
+  "ui": {
+    "layout": "e",
+    "palette": "blue"
+  },
+  "upstream": null
+}
