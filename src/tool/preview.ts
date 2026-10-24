@@ -1,5 +1,6 @@
 // 截图与预览用的示例数据（不会进入正式运行）
 import type { Row } from '../kit/runner';
+import type { ResizeData } from './ui';
 
 const img = (n: string) => new URL(`../../samples/${n}`, import.meta.url).href;
 const files: [string, string, number, Row['status'], string?][] = [
@@ -12,6 +13,17 @@ const files: [string, string, number, Row['status'], string?][] = [
   ['损坏的图.jpg', '小图-300.png', 21, 'err', '无法识别这张图片，可能已损坏或格式不受支持（支持 JPG、PNG、WebP、BMP、GIF）'],
 ];
 
+const MB = 1024 * 1024;
+const outs = (kb: number, small = false): ResizeData => ({
+  srcW: small ? 300 : 1600, srcH: small ? 300 : 1000, fit: 'pad', white: true, upscaled: small,
+  outs: [
+    { label: '淘宝天猫 800×800', w: 800, h: 800, bytes: kb * 1024, maxBytes: 3 * MB },
+    { label: '拼多多 800×800', w: 800, h: 800, bytes: Math.round(kb * 1024 * 9.2), maxBytes: 1 * MB, quality: 78 },
+    { label: '京东 800×800', w: 800, h: 800, bytes: kb * 1024, maxBytes: 0 },
+    { label: '亚马逊 2000×2000', w: 2000, h: 2000, bytes: Math.round(kb * 1024 * 4.8), maxBytes: 10 * MB },
+  ],
+});
+
 export const rows = (state: string): Row[] =>
   state === 'empty' ? [] : files.map(([name, sample, size, status, text], i) => {
     const st = state === 'done' && status !== 'err' ? 'ok' : status;
@@ -20,7 +32,7 @@ export const rows = (state: string): Row[] =>
       status: st,
       progress: st === 'run' ? 0.5 : st === 'ok' ? 1 : 0,
       error: st === 'err' ? text : undefined,
-      result: st === 'ok' ? { summary: text ?? '原图 1000×1500，导出 4 个', outputPath: '/示例/输出/淘宝天猫', preview: img(sample) } : undefined,
+      result: st === 'ok' ? { summary: text ?? '原图 1000×1500，导出 4 个', outputPath: '/示例/输出/淘宝天猫', preview: img(sample), data: outs(name.startsWith('小图') ? 31 : 86 - i * 3, name.startsWith('小图')) } : undefined,
     };
   });
 

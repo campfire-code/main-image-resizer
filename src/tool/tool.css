@@ -1,0 +1,33 @@
+/* 主图多平台尺寸导出：类名统一以 mr- 开头，只用 kit.css 的变量 */
+.mr-empty { display: flex; flex-direction: column; gap: 20px; padding: 24px 22px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); }
+.mr-empty-hd h2 { margin: 0 0 6px; font-size: 1.4em; line-height: 1.3; color: var(--ink); }
+.mr-empty-hd p { margin: 0; color: var(--muted); line-height: 1.6; }
+.mr-flow { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.mr-src, .mr-tile { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.mr-src small, .mr-tile small { color: var(--muted); font-size: 12.5px; }
+.mr-tile b { font-size: 13px; color: var(--ink); font-weight: 600; }
+.mr-tile .mr-lim { color: var(--primary); font-weight: 600; }
+.mr-arrow { color: var(--primary); flex: none; }
+.mr-tiles { display: flex; gap: 12px; flex-wrap: wrap; flex: 1; min-width: 0; }
+.mr-tile { min-width: 74px; }
+.mr-tile .mr-frame { width: 58px; height: 58px; display: flex; align-items: center; justify-content: center; background: transparent; border: 0; }
+.mr-pic { display: block; background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 45%, var(--surface))); border-radius: 4px; }
+.mr-src .mr-pic { box-shadow: 0 4px 12px rgb(0 0 0 / .14); }
+.mr-tile .mr-frame .mr-pic { width: 100%; height: 100%; }
+.mr-tile .mr-frame { }
+.mr-tile .mr-frame[style] { box-shadow: 0 0 0 1.5px var(--line-strong); border-radius: 4px; }
+
+.mr-result { display: flex; flex-direction: column; gap: 10px; width: 100%; min-width: 0; }
+.mr-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.mr-warn { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); font-weight: 600; }
+.mr-outs { display: flex; gap: 8px; flex-wrap: wrap; }
+.mr-out { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; width: 112px; padding: 8px; background: var(--chip); border-radius: var(--radius); }
+.mr-out b { font-size: 14px; color: var(--ink); }
+.mr-out small { font-size: 12.5px; color: var(--muted); }
+.mr-out .mr-frame { align-self: center; display: block; overflow: hidden; border-radius: 3px; box-shadow: 0 0 0 1px var(--line-strong); background: var(--surface); margin-bottom: 4px; }
+.mr-out .mr-frame img { display: block; width: 100%; height: 100%; }
+.mr-size { font-size: 17px; font-weight: 700; color: var(--ink); }
+.mr-meter { display: block; width: 100%; height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.mr-meter i { display: block; height: 100%; background: var(--ok); border-radius: 3px; transition: width .2s var(--ease); }
+.mr-meter i.hot { background: var(--warn); }
+.mr-plain { margin: 0; color: var(--muted); }

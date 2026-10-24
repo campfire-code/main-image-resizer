@@ -40,7 +40,7 @@ export function parseCustomSizes(text: string): Size[] {
   const out: Size[] = [];
   for (const p of parts) {
     const m = /^(\d{2,5})\s*[x×X*]\s*(\d{2,5})$/.exec(p);
-    if (!m) throw new Error(`自定义尺寸「${p}」看不懂，请写成 宽x高，例如 1200x1200，多个用逗号隔开`);
+    if (!m) throw new Error(`自定义尺寸「${p}」看不懂，请写成 宽x高，例如 1200×1200，多个用逗号隔开`);
     const w = Number(m[1]);
     const h = Number(m[2]);
     if (w < 50 || h < 50 || w > 8000 || h > 8000) throw new Error(`自定义尺寸「${p}」超出范围，宽和高需要在 50 到 8000 像素之间`);
